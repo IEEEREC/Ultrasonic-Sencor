@@ -1,52 +1,71 @@
-/*
- HC-SR04 Ping distance sensor]
- VCC to arduino 5v GND to arduino GND
- Echo to Arduino pin 13 Trig to Arduino pin 12
- Red POS to Arduino pin 11
- Green POS to Arduino pin 10
- 560 ohm resistor to both LED NEG and GRD power rail
- More info at: http://goo.gl/kJ8Gl
- Original code improvements to the Ping sketch sourced from Trollmaker.com
- Some code and wiring inspired by http://en.wikiversity.org/wiki/User:Dstaub/robotcar
- */
+#include <LiquidCrystal_I2C.h>
 
-#define trigPin 13
-#define echoPin 12
-#define led 11
-#define led2 10
+//  Set the pins
+const int triggerPin = 0;
+const int echoPin = 16;
 
+long duration;
+int distance;
+
+//  A counter to determine when to clear the LCD
+int clearDisplayCount = 0;
+
+LiquidCrystal_I2C lcd(0x27, 16, 1);
 void setup() {
-  Serial.begin (9600);
-  pinMode(trigPin, OUTPUT);
+  //  Configure the pins to behave either as an input or an output
+  pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  pinMode(led, OUTPUT);
-  pinMode(led2, OUTPUT);
+
+  //  Initialize the LCD
+  lcd.init();
+
+  //  Turn on the LCD backlight
+  lcd.backlight();
 }
 
 void loop() {
-  long duration, distance;
-  digitalWrite(trigPin, LOW);  // Added this line
-  delayMicroseconds(2); // Added this line
-  digitalWrite(trigPin, HIGH);
-//  delayMicroseconds(1000); - Removed this line
-  delayMicroseconds(10); // Added this line
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = (duration/2) / 29.1;
-  if (distance < 4) {  // This is where the LED On/Off happens
-    digitalWrite(led,HIGH); // When the Red condition is met, the Green LED should turn off
-  digitalWrite(led2,LOW);
-}
-  else {
-    digitalWrite(led,LOW);
-    digitalWrite(led2,HIGH);
+  // Clears the trigPin
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  float microseconds = pulseIn(echoPin, HIGH);
+  //  Convert to seconds
+  float seconds = microseconds / 1000000;
+  //  Convert to meters knowing that sound travels in air with a velocity of 343m/s
+  float meters = seconds * 343;
+  //  Convert to cm
+  float cm = meters * 100;
+  //  Divide by two since we care about the distance to the object, not
+  //  to the object and back
+  cm = cm / 2;
+  //  Save to distance variable
+  distance = cm;
+
+  //  Prints "Distance: 0000cm"
+  //  16 characters avilable
+  lcd.print("Distance: "); // 10 characters
+  lcd.printf("%04d", distance); //  4 characters
+  lcd.print("cm"); //  2 characters
+  //  Total = 16 characters
+  delay(250);
+
+  //  Clears the buffer of the LCD after 2048 cycles of the loop
+  if (clearDisplayCount == 2048) {
+    //  Resets counter
+    clearDisplayCount = 0;
+    //  Clear the LCD display and the buffer
+    lcd.clear();
+  } else {
+    //  Set the location at which subsequent text written to the LCD will be displayed
+    lcd.setCursor(0, 0);
   }
-  if (distance >= 200 || distance <= 0){
-    Serial.println("Out of range");
-  }
-  else {
-    Serial.print(distance);
-    Serial.println(" cm");
-  }
-  delay(500);
+
+  //  Increments the count for clearing display
+  clearDisplayCount++;
 }
