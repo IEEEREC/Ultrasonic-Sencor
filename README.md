@@ -2,7 +2,7 @@
 
 LIQUID CRYSTAL LIBRARY
 -
-LiquidCrystal_I2C.zip
+LiquidCrystal_I2C.zip\
 Extract the folder and drop it into you Arduino/Libraries/ folder.
 
 ULTRASONIC SENSOR PIN OUT
