@@ -2,7 +2,7 @@
 
 ULTRASONIC SENSOR PIN OUT
 -------------------------
-Gnd to GND
+Gnd to GND\n
 Trig to Pin 0
 Echo to Pin 16
 VCC to USB
