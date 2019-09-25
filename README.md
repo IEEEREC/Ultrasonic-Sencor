@@ -1,4 +1,4 @@
-# Ultrasonic-Sensor
+# Ultrasonic-Sensor & LiquidCrystal-I2C
 
 ULTRASONIC SENSOR PIN OUT
 -------------------------
